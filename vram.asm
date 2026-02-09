@@ -15,9 +15,38 @@ Start:
 		mov di, 5
 		call ShiftText
 
+		mov di, ax
+
 		mov bx, ax
 		mov ax, 0ce31h
 		mov es:[bx], ax
+
+		mov dl, ds:[80h]
+
+
+		test dl, dl
+		jz .pw_loop_end
+
+		dec dl
+		
+		xor cx, cx
+.pw_loop_start:
+		cmp cx, dx
+		jge .pw_loop_end
+
+		mov bx, cx
+		mov al, ds:[bx + 82h]
+		mov ah, 0ceh
+
+		mov bx, cx
+		shl bx, 1
+		add bx, di
+		mov es:[bx], ax
+
+		inc cx
+		jmp .pw_loop_start
+.pw_loop_end:
+
 
 		mov ax, 4c00h
 		int 21h
