@@ -2,6 +2,7 @@
 
 W_HEIGHT	equ 25
 W_WIDTH		equ 80
+FILLER_SYM	equ 0503h ; Pink heart, used for debugging. Replace with 0000 to clear the area
 
 .code
 org 100h
@@ -11,14 +12,19 @@ Start:
 		mov ax, 0b800h
 		mov es, ax
 
-		mov di, 25
+		mov di, 5
 		call ShiftText
+
+		mov bx, ax
+		mov ax, 0ce31h
+		mov es:[bx], ax
 
 		mov ax, 4c00h
 		int 21h
 
 ShiftText:
 ; DI is nrows needed to shift down
+; Returns AX - relative pointer to the first symbol of filled area
 TEXT_OFFSET	= di
 
 		push es
@@ -90,6 +96,10 @@ TEXT_OFFSET	= di
 		mov cx, ax
 
 .fill_gaps_uwu:
+		mov bx, cx
+		shl bx, 1
+		push bx
+
 		mov ax, W_WIDTH
 		mul TEXT_OFFSET
 		mov dx, cx
@@ -98,7 +108,7 @@ TEXT_OFFSET	= di
 .lp_fill_gap_hearts:
 		mov bx, cx
 		shl bx, 1
-		mov ax, 0503h
+		mov ax, FILLER_SYM
 		mov es:[bx], ax
 		inc cx
 		cmp cx, dx
@@ -121,6 +131,7 @@ TEXT_OFFSET	= di
 
 
 .exit_func:	
+		pop ax
 		mov sp, bp
 		pop bp
 		pop es
